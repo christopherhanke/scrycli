@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 const apiURL = "https://api.scryfall.com"
@@ -41,9 +44,26 @@ func search(args []string) ([]string, error) {
 	}
 	defer resp.Body.Close()
 
-	fmt.Printf("URL: %s\n", searchURL.String())
-	fmt.Printf("Status: %s\n", resp.Status)
-	fmt.Printf("Header: %s\n", resp.Header.Get("content-type"))
+	// check response status code for too many requests
+	if resp.StatusCode == http.StatusTooManyRequests {
+		time.Sleep(time.Millisecond * 100)
+		return nil, fmt.Errorf("too many requests")
+	}
 
-	return nil, nil
+	// unmarshal json data from response and list the names of the cards
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	var scryresp scryResponse
+	err = json.Unmarshal(data, &scryresp)
+	if err != nil {
+		return nil, err
+	}
+	var returnlist []string
+	for _, entry := range scryresp.Data {
+		returnlist = append(returnlist, entry.Name)
+	}
+
+	return returnlist, nil
 }
