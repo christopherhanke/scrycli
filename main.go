@@ -45,7 +45,7 @@ func main() {
 				return
 			}
 			for i, result := range results {
-				fmt.Printf("%2d. %s\n", i, result)
+				fmt.Printf("%2d. %s\n", i+1, result)
 			}
 		}
 	}
