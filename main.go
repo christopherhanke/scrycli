@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -14,17 +15,25 @@ func cleanInput(input string) []string {
 }
 
 func main() {
-	fmt.Print("Welcome to SCRY CLI.\n\n")
-
 	// initialize commandline reader
+	fmt.Print("Welcome to SCRY CLI.\n")
 	scanner := bufio.NewScanner(os.Stdin)
 
+	// initialize config
+	cfg := &config{
+		client:   &http.Client{},
+		commands: getCommands(),
+	}
+
+	// CLI loop
 	for {
 		fmt.Print("SCRY > ")
 		scanner.Scan()
 		if err := scanner.Err(); err != nil {
 			fmt.Fprint(os.Stderr, "readig standard input:", err)
 		}
+
+		// clean input to list of lower strings
 		input := cleanInput(scanner.Text())
 		if len(input) == 0 {
 			continue
@@ -34,19 +43,14 @@ func main() {
 		if len(input) > 1 {
 			args = input[1:]
 		}
-		fmt.Printf("Command: %s\nArguments: %s\n", commandName, args)
-		if commandName == "exit" {
-			break
-		}
-		if commandName == "search" && len(args) > 0 {
-			results, err := search(args)
-			if err != nil {
-				fmt.Printf("Error: %v\n", err)
-				return
-			}
-			for i, result := range results {
-				fmt.Printf("%2d. %s\n", i+1, result)
-			}
+		// fmt.Printf("Command: %s\nArguments: %s\n", commandName, args)
+
+		_, ok := cfg.commands[commandName]
+		if ok {
+			cfg.commands[commandName].Command(cfg, args)
+		} else {
+			fmt.Printf("command is not valid: %s\n", commandName)
+			fmt.Println("call 'help' for information")
 		}
 	}
 }

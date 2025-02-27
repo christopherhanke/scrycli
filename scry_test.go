@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"reflect"
 	"testing"
 	"time"
@@ -18,8 +19,9 @@ func TestSearch(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
+			client := &http.Client{}
 			testFields := cleanInput(test.input)
-			output, err := search(testFields)
+			output, err := search(client, testFields)
 			if err != nil {
 				t.Fatalf("Searching failed: %v", err)
 			}
@@ -33,8 +35,8 @@ func TestSearch(t *testing.T) {
 
 func TestEmptySearch(t *testing.T) {
 	expected := fmt.Errorf("no args given")
-	_, err := search([]string{})
-
+	client := &http.Client{}
+	_, err := search(client, []string{})
 	if errors.Is(err, expected) {
 		t.Fatalf("Empty Search Error failed\nExpected: %v\nActual: %v", expected, err)
 	}

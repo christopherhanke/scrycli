@@ -11,7 +11,7 @@ import (
 
 const apiURL = "https://api.scryfall.com"
 
-func search(args []string) ([]string, error) {
+func search(client *http.Client, args []string) ([]string, error) {
 	// build API string, escape query and parse to URL
 	searchString := apiURL + "/cards/search?q="
 	if len(args) < 1 {
@@ -31,13 +31,11 @@ func search(args []string) ([]string, error) {
 	}
 
 	// call API and close response
-	client := &http.Client{}
 	req, err := http.NewRequest("GET", searchURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "ScryCLI/0.1")
-	req.Header.Set("Accept", "*/*")
+	setRequest(req)
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
