@@ -22,17 +22,17 @@ func getCommands() map[string]cliCommand {
 	commands := map[string]cliCommand{
 		"help": {
 			Name:        "help",
-			Description: "Displays a help message.",
+			Description: "Displays a help message, explaining the usage of ScryCLI. No arguments needed.",
 			Command:     handlerHelp,
 		},
 		"search": {
 			Name:        "search",
-			Description: "search one or more cards",
+			Description: "Search for one or more cards, just attach the search term (e.g. 'search Sheoldred the').",
 			Command:     handlerSearch,
 		},
 		"exit": {
 			Name:        "exit",
-			Description: "exit ScryCLI",
+			Description: "Exits the ScryCLI. No arguments needed.",
 			Command:     handlerExit,
 		},
 	}
@@ -41,7 +41,6 @@ func getCommands() map[string]cliCommand {
 
 // set request Header information for API requirements
 func setRequest(req *http.Request) {
-	// set request header to API requirements
 	req.Header.Set("User-Agent", "ScryCLI/0.1")
 	req.Header.Set("Accept", "*/*")
 }
@@ -54,8 +53,11 @@ func handlerExit(cfg *config, args []string) error {
 
 // display information to user how to use application
 func handlerHelp(cfg *config, args []string) error {
-	// #TODO
-	fmt.Println("here comes help")
+	fmt.Print("Usage of the ScryCLI\nJust type one of the following commands and add the arguments if necessary:\n\n")
+	for name, obj := range cfg.commands {
+		fmt.Printf("%8s: %s\n", name, obj.Description)
+	}
+	fmt.Println()
 	return nil
 }
 
