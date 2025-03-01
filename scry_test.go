@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -34,10 +33,41 @@ func TestSearch(t *testing.T) {
 }
 
 func TestEmptySearch(t *testing.T) {
-	expected := fmt.Errorf("no args given")
+	expected := fmt.Errorf("no query arguments given")
 	client := &http.Client{}
 	_, err := search(client, []string{})
-	if errors.Is(err, expected) {
+	if err.Error() != expected.Error() {
 		t.Fatalf("Empty Search Error failed\nExpected: %v\nActual: %v", expected, err)
 	}
+}
+
+func TestSearchQuery(t *testing.T) {
+	tests := map[string]struct {
+		input    []string
+		expected string
+	}{
+		"Test query only name":  {[]string{"sheoldred", "the"}, "sheoldred+the"},
+		"Test query with color": {[]string{"urza", "c:u"}, "urza+c%3Au"},
+		"Test query with cmc":   {[]string{"urza", "cmc=4"}, "urza+cmc%3D4"},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			output, err := searchQuery(test.input)
+			if err != nil {
+				t.Fatalf("Query conversion failed: %v", err)
+			}
+			if !reflect.DeepEqual(output, test.expected) {
+				t.Fatalf("Querry result differ\nExpected: %s\nActual: %s", test.expected, output)
+			}
+		})
+	}
+}
+
+func TestSearchQueryEmpty(t *testing.T) {
+	expected := fmt.Errorf("no query arguments given")
+	_, err := searchQuery([]string{})
+	if err.Error() != expected.Error() {
+		t.Fatalf("Empty Query Error failed\nExpected: %v\nActual: %v", expected, err)
+	}
+
 }

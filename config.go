@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"slices"
 )
 
 type config struct {
@@ -65,6 +66,10 @@ func handlerHelp(cfg *config, args []string) error {
 func handlerSearch(cfg *config, args []string) error {
 	if len(args) < 1 {
 		return fmt.Errorf("no args given")
+	}
+	if slices.Contains(args, "--help") {
+		searchHelp()
+		return nil
 	}
 	results, err := search(cfg.client, args)
 	if err != nil {

@@ -12,18 +12,12 @@ import (
 const apiURL = "https://api.scryfall.com"
 
 func search(client *http.Client, args []string) ([]string, error) {
-	// build API string, escape query and parse to URL
-	searchString := apiURL + "/cards/search?q="
-	if len(args) < 1 {
-		return nil, fmt.Errorf("no args given")
+	// build API string and parse to URL
+	queryString, err := searchQuery(args)
+	if err != nil {
+		return nil, err
 	}
-	name := args[0]
-	if len(args) > 1 {
-		for _, arg := range args[1:] {
-			name += " " + arg
-		}
-	}
-	searchString += url.QueryEscape(name)
+	searchString := apiURL + "/cards/search?q=" + queryString
 
 	searchURL, err := url.Parse(searchString)
 	if err != nil {
@@ -64,4 +58,22 @@ func search(client *http.Client, args []string) ([]string, error) {
 	}
 
 	return returnlist, nil
+}
+
+// build search query string from string list
+func searchQuery(args []string) (string, error) {
+	if len(args) < 1 {
+		return "", fmt.Errorf("no query arguments given")
+	}
+	name := args[0]
+	if len(args) > 1 {
+		for _, arg := range args[1:] {
+			name += " " + arg
+		}
+	}
+	return url.QueryEscape(name), nil
+}
+
+func searchHelp() {
+	fmt.Println("here comes help")
 }
