@@ -31,6 +31,11 @@ func getCommands() map[string]cliCommand {
 			Description: "Search for one or more cards, just attach the search term (e.g. 'search Sheoldred the').",
 			Command:     handlerSearch,
 		},
+		"random": {
+			Name:        "random",
+			Description: "Get a random card.",
+			Command:     handlerRandom,
+		},
 		"exit": {
 			Name:        "exit",
 			Description: "Exits the ScryCLI. No arguments needed.",
@@ -75,8 +80,25 @@ func handlerSearch(cfg *config, args []string) error {
 	if err != nil {
 		return err
 	}
-	for i, result := range results {
-		fmt.Printf("%2d. %s\n", i+1, result)
+	if len(results) > 10 {
+		fmt.Printf("Your search results in %d cards.", len(results))
+		userinput := cliContinue()
+		if !userinput {
+			return nil
+		}
 	}
+	for i, result := range results {
+		fmt.Printf("%3d. %-30s %-30s %t\n", i+1, result.Name, result.ManaCost, result.Digital)
+	}
+	return nil
+}
+
+func handlerRandom(cfg *config, args []string) error {
+	result, err := randomCard(cfg.client)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%-30s %-30s %t\n", result.Name, result.ManaCost, result.Digital)
+
 	return nil
 }
