@@ -46,9 +46,11 @@ func TestSearchQuery(t *testing.T) {
 		input    []string
 		expected string
 	}{
-		"Test query only name":  {[]string{"sheoldred", "the"}, "sheoldred+the"},
-		"Test query with color": {[]string{"urza", "c:u"}, "urza+c%3Au"},
-		"Test query with cmc":   {[]string{"urza", "cmc=4"}, "urza+cmc%3D4"},
+		"Test query only name":      {[]string{"sheoldred", "the"}, "sheoldred+the"},
+		"Test query with color":     {[]string{"urza", "c:u"}, "urza+c%3Au"},
+		"Test query with cmc":       {[]string{"urza", "cmc=4"}, "urza+cmc%3D4"},
+		"Test query with quotation": {[]string{"urza", "o:'draw'"}, "urza+o%3A%27draw%27"},
+		"Test query with quotes":    {[]string{"urza", "o:\"draw\""}, "urza+o%3A%22draw%22"},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {

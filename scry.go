@@ -11,7 +11,7 @@ import (
 
 const apiURL = "https://api.scryfall.com"
 
-func search(client *http.Client, args []string) ([]string, error) {
+func search(client *http.Client, args []string) ([]card, error) {
 	// build API string and parse to URL
 	queryString, err := searchQuery(args)
 	if err != nil {
@@ -37,9 +37,8 @@ func search(client *http.Client, args []string) ([]string, error) {
 	defer resp.Body.Close()
 
 	// check response status code for too many requests
-	if resp.StatusCode == http.StatusTooManyRequests {
-		time.Sleep(time.Millisecond * 100)
-		return nil, fmt.Errorf("too many requests")
+	if err = checkResponseCode(resp); err != nil {
+		return nil, err
 	}
 
 	// unmarshal json data from response and list the names of the cards
@@ -52,9 +51,10 @@ func search(client *http.Client, args []string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	var returnlist []string
+
+	var returnlist []card
 	for _, entry := range scryresp.Data {
-		returnlist = append(returnlist, entry.Name)
+		returnlist = append(returnlist, entry)
 	}
 
 	return returnlist, nil
@@ -75,5 +75,58 @@ func searchQuery(args []string) (string, error) {
 }
 
 func searchHelp() {
-	fmt.Println("here comes help")
+	fmt.Print("usage: search <search term>\n\n")
+	fmt.Println("You can just write a search term like a card name and/or you can use queries like color and manacost.")
+	fmt.Print("Search queries work with a query key and a colon (e.g. 'c:r' for color red) or comparison like '<='/'>=' etc.\n\n")
+	fmt.Println("These are some of the queries that are possibel:")
+	fmt.Println(" color: [c:wu] for cards that are white and blue. [id:wu] checks for color identity white and blue. You can use 'w, u, b, r, g'.")
+	fmt.Println(" type: [t:creature] for creature cards. Any supertype, card type or subtype is possible.")
+	fmt.Println(" oracle: [o:'text'] searches fot <text> in oracle text.")
+	fmt.Println(" mana: [m:g] for cards with one green mana in their mana costs. You can staple these like [c:gguu] for two green and two blue mana pips. You can use 'w, u, b, r, g'.")
+	fmt.Println(" manavalue: [mv<=4] for cards with mana value lower or equal to four.")
+	fmt.Println(" rarity: [r:c] for common cards. You can use compare operands and 'c, u, r, m'.")
+	fmt.Println(" set: [set:khm] for cards from Kaldheim. Use set with their magic set code.")
+	fmt.Println(" format: [f:pauper] for cards legal in pauper. Supported: standard, pioneer, modern, legacy, pauper, vintage, commander.")
+}
+
+func randomCard(client *http.Client) (card, error) {
+	// build API string
+	urlString := apiURL + "/cards/random"
+
+	req, err := http.NewRequest("GET", urlString, nil)
+	if err != nil {
+		return card{}, err
+	}
+	setRequest(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		return card{}, err
+	}
+	defer resp.Body.Close()
+
+	// check response status code for too many requests
+	if err = checkResponseCode(resp); err != nil {
+		return card{}, err
+	}
+
+	//unmarshal json data from response
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return card{}, err
+	}
+	var result card
+	err = json.Unmarshal(data, &result)
+	if err != nil {
+		return card{}, err
+	}
+	return result, nil
+}
+
+// check HTTP Response code for too many requests
+func checkResponseCode(resp *http.Response) error {
+	if resp.StatusCode == http.StatusTooManyRequests {
+		time.Sleep(time.Millisecond * 100)
+		return fmt.Errorf("too many requests")
+	}
+	return nil
 }
