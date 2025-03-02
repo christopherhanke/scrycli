@@ -54,3 +54,24 @@ func main() {
 		}
 	}
 }
+
+func cliContinue() bool {
+	scanner := bufio.NewScanner(os.Stdin)
+	for {
+		fmt.Print("Do you want to continue?\n[y/n] >")
+		scanner.Scan()
+		if err := scanner.Err(); err != nil {
+			fmt.Fprint(os.Stderr, "reading standard input:", err)
+		}
+		input := scanner.Text()
+		input = strings.ToLower(input)
+		if input == "y" {
+			return true
+		}
+		if input == "n" {
+			return false
+		}
+		fmt.Println("Please enter [y/n]")
+
+	}
+}
