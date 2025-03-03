@@ -88,17 +88,21 @@ func handlerSearch(cfg *config, args []string) error {
 		}
 	}
 	for i, result := range results {
-		fmt.Printf("%3d. %-30s %-30s %t\n", i+1, result.Name, result.ManaCost, result.Digital)
+		fmt.Printf("%3d. %-30s %-30s\n", i+1, result.Name, result.ManaCost)
 	}
 	return nil
 }
 
 func handlerRandom(cfg *config, args []string) error {
-	result, err := randomCard(cfg.client)
+	if slices.Contains(args, "--help") {
+		randomHelp()
+		return nil
+	}
+	result, err := randomCard(cfg.client, args)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%-30s %-30s %t\n", result.Name, result.ManaCost, result.Digital)
+	fmt.Printf("%-30s %-30s\n", result.Name, result.ManaCost)
 
 	return nil
 }

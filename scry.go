@@ -53,9 +53,7 @@ func search(client *http.Client, args []string) ([]card, error) {
 	}
 
 	var returnlist []card
-	for _, entry := range scryresp.Data {
-		returnlist = append(returnlist, entry)
-	}
+	returnlist = append(returnlist, scryresp.Data...)
 
 	return returnlist, nil
 }
@@ -89,9 +87,17 @@ func searchHelp() {
 	fmt.Println(" format: [f:pauper] for cards legal in pauper. Supported: standard, pioneer, modern, legacy, pauper, vintage, commander.")
 }
 
-func randomCard(client *http.Client) (card, error) {
+// return a random card
+func randomCard(client *http.Client, args []string) (card, error) {
 	// build API string
 	urlString := apiURL + "/cards/random"
+	if len(args) > 0 {
+		queryString, err := searchQuery(args)
+		if err != nil {
+			return card{}, err
+		}
+		urlString += "?q=" + queryString
+	}
 
 	req, err := http.NewRequest("GET", urlString, nil)
 	if err != nil {
@@ -120,6 +126,11 @@ func randomCard(client *http.Client) (card, error) {
 		return card{}, err
 	}
 	return result, nil
+}
+
+func randomHelp() {
+	fmt.Print("usage: random <optional filter>\n\n")
+	fmt.Println("You can just call \"random\" without any filters and get a random card. \nIf you want to filter for something you can use all queries that can be used within the search.")
 }
 
 // check HTTP Response code for too many requests
