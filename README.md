@@ -12,6 +12,7 @@ In this project I want to accomplish:
 I want to have a CLI where I can search for card names and get all cards back that match the given information.
 
 ## TODO
+ - work on a timer to refrain from too many requests
 
 # Glossar
 > MtG = Magic the Gathering
