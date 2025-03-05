@@ -47,7 +47,10 @@ func main() {
 
 		_, ok := cfg.commands[commandName]
 		if ok {
-			cfg.commands[commandName].Command(cfg, args)
+			err := cfg.commands[commandName].Command(cfg, args)
+			if err != nil {
+				fmt.Printf("Error with command: %s\nError: %v", commandName, err)
+			}
 		} else {
 			fmt.Printf("command is not valid: %s\n", commandName)
 			fmt.Println("call 'help' for information")
