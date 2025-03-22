@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 func cleanInput(input string) []string {
@@ -51,6 +52,7 @@ func main() {
 			if err != nil {
 				fmt.Printf("Error with command: %s\nError: %v", commandName, err)
 			}
+			time.Sleep(time.Millisecond * 100)
 		} else {
 			fmt.Printf("command is not valid: %s\n", commandName)
 			fmt.Println("call 'help' for information")
